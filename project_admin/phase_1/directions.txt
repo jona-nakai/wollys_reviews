@@ -1,0 +1,14 @@
+- Write a rough draft of a literature review, containing an overview of at least 2 previously published papers
+  detailing their relevance to your project idea, cited appropriately. This is a rough draft: your project may
+  change substantially after submitting, but the intention here is to get you started thinking about the project
+  sooner rather than later. As long as you make a good faith effort, you will receive the point for Phase I.
+  Please submit a .pdf of the lit review using the field below:
+
+- Go to Canvas, find the "Final Project Teams" link in the Project Admin module, and in the spreadsheet paste
+  the link to your GitHub repo for the project. You must also add Dr. Gerber as a collaborator. Note, you will
+  need to access the spreadsheet using your Northeastern account.
+
+- Within your GitHub repo, you must have some code that demonstrates a Proof-of-Concept of your first ML model
+  for the project. Once again, this can change substantially (or even completely) after submitting, but I want
+  you to demonstrate that you have started some form of analysis. Please submit a screenshot (.jpg or .png) of
+  the code within your GitHub repo using the field below:
