@@ -5,7 +5,8 @@ import { auth } from "../services/firebase";
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(undefined); // undefined = still loading
+  // undefined = still resolving, null = signed out, object = signed in
+  const [user, setUser] = useState(undefined);
 
   useEffect(() => onAuthStateChanged(auth, u => setUser(u ?? null)), []);
 
@@ -17,5 +18,7 @@ export function AuthProvider({ children }) {
 }
 
 export function useAuth() {
-  return useContext(AuthContext);
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used inside <AuthProvider>");
+  return ctx;
 }

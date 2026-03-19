@@ -4,10 +4,7 @@ import RatingsPage from "./pages/RatingsPage";
 
 function AppRoutes() {
   const { user } = useAuth();
-
-  // Still resolving auth state
-  if (user === undefined) return null;
-
+  if (user === undefined) return null; // still resolving auth state
   return user ? <RatingsPage /> : <LoginPage />;
 }
 

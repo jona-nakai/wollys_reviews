@@ -38,3 +38,7 @@ export const SANDWICHES = {
       },
     },
   };
+  
+  // Flat list of all sandwich IDs across all categories, used for batch queries
+  export const ALL_SANDWICH_IDS = Object.values(SANDWICHES)
+    .flatMap(cat => Object.keys(cat.items));

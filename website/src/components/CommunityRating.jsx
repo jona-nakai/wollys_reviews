@@ -1,12 +1,12 @@
-import { T, BRAND } from "../constants/theme";
+import styles from "./CommunityRating.module.css";
 
 export default function CommunityRating({ avg, count }) {
   if (!avg) return null;
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-      <span style={{ fontSize: 11, color: T.accent }}>★</span>
-      <span style={{ fontSize: 11, fontWeight: 600, color: T.text }}>{avg}</span>
-      <span style={{ fontSize: 10, color: T.muted }}>({count} ratings)</span>
+    <div className={styles.row}>
+      <span className={styles.star}>★</span>
+      <span className={styles.avg}>{avg}</span>
+      <span className={styles.count}>({count} ratings)</span>
     </div>
   );
 }
