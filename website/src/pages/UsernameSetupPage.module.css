@@ -1,0 +1,114 @@
+.page {
+    min-height: 100vh;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  
+  .card {
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+  }
+  
+  .avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 16px;
+    border: 2px solid var(--border);
+  }
+  
+  .title {
+    font-family: var(--font-serif);
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 8px;
+    letter-spacing: -0.4px;
+  }
+  
+  .subtitle {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin: 0 0 28px;
+  }
+  
+  /* Input */
+  .inputWrap {
+    display: flex;
+    align-items: center;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 0 12px;
+    margin-bottom: 10px;
+    transition: border-color 0.15s;
+  }
+  
+  .inputWrap:focus-within {
+    border-color: #C8102E;
+  }
+  
+  .at {
+    font-size: 16px;
+    color: var(--muted);
+    font-family: var(--font-serif);
+    padding-right: 4px;
+  }
+  
+  .input {
+    flex: 1;
+    padding: 12px 4px;
+    background: none;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    color: var(--text);
+    font-family: var(--font-sans);
+  }
+  
+  .statusIcon {
+    font-size: 14px;
+    width: 20px;
+    text-align: center;
+  }
+  
+  /* Hint */
+  .hint {
+    font-size: 12px;
+    color: var(--muted);
+    margin: 0 0 20px;
+    min-height: 18px;
+    transition: color 0.15s;
+  }
+  
+  .hintGreen { color: var(--green); }
+  .hintRed   { color: #C8102E; }
+  
+  .error {
+    font-size: 12px;
+    color: #C8102E;
+    margin: -12px 0 16px;
+  }
+  
+  /* Button */
+  .btn {
+    width: 100%;
+    padding: 14px;
+    background: #C8102E;
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-size: 15px;
+    font-weight: 600;
+    font-family: var(--font-serif);
+    transition: background 0.15s, opacity 0.15s;
+  }
+  
+  .btn:hover:not(:disabled) { background: #a50d25; }
+  .btn:disabled { opacity: 0.4; cursor: default; }

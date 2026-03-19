@@ -3,19 +3,28 @@ import { signOut } from "firebase/auth";
 import { auth } from "../services/firebase";
 import { SANDWICHES } from "../constants/sandwiches";
 import { useAuth } from "../context/AuthContext";
-import { useRatings } from "../hooks/useRatings";
 import SandwichRow from "../components/SandwichRow";
+import NotificationBell from "../components/NotificationBell";
 import styles from "./RatingsPage.module.css";
 
 const ALL_COUNT = Object.values(SANDWICHES)
   .reduce((sum, cat) => sum + Object.keys(cat.items).length, 0);
 
-export default function RatingsPage() {
+export default function RatingsPage({
+  ratingsState,
+  username,
+  notifications,
+  unreadCount,
+  onMarkAllRead,
+  onFollowBack,
+  followingIds,
+  onOpenFriends,
+}) {
   const { user } = useAuth();
   const {
-    ratings, communityRatings, saving, unsaved, error,
+    ratings, saved, communityRatings, saving, unsaved, error,
     totalRated, loading, updateRating, saveRatings, loadCommunityRatings,
-  } = useRatings(user);
+  } = ratingsState;
 
   const [activeCategory, setCategory] = useState("breakfast");
   const [search, setSearch]           = useState("");
@@ -60,11 +69,20 @@ export default function RatingsPage() {
       {/* Header */}
       <header className={styles.header}>
         <div className={styles.headerLeft}>
-          <img src={user.photoURL} alt={user.displayName} className={styles.avatar} />
-          <span className={styles.firstName}>{user.displayName?.split(" ")[0]}</span>
+          <span className={styles.firstName}>@{username}</span>
         </div>
         <span className={styles.headerTitle}>Wally's Reviews</span>
         <div className={styles.headerRight}>
+          <NotificationBell
+            notifications={notifications}
+            unreadCount={unreadCount}
+            onMarkAllRead={onMarkAllRead}
+            onFollowBack={onFollowBack}
+            followingIds={followingIds}
+          />
+          <button className={styles.friendsBtn} onClick={onOpenFriends}>
+            Friends
+          </button>
           <button className={styles.signOutBtn} onClick={() => signOut(auth)}>
             Sign out
           </button>
@@ -140,7 +158,7 @@ export default function RatingsPage() {
                 name={name}
                 myRating={ratings[id] || 0}
                 communityR={communityRatings[id]}
-                isSaved={!!ratings[id] && ratings[id] === ratings[id]}
+                isSaved={!!saved?.[id]}
                 isLast={i === filtered.length - 1}
                 onChange={updateRating}
               />

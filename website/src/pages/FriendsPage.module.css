@@ -1,0 +1,310 @@
+.page {
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* ── Header ── */
+  .header {
+    background: #C8102E;
+    border-bottom: 3px solid #A4804A;
+    padding: 0 24px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+  
+  .backBtn {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: rgba(255,255,255,0.85);
+    border-radius: var(--radius-sm);
+    padding: 5px 12px;
+    font-size: 12px;
+    min-width: 80px;
+    transition: background 0.15s;
+  }
+  
+  .backBtn:hover {
+    background: rgba(255,255,255,0.22);
+  }
+  
+  .headerTitle {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    font-size: 18px;
+    color: #fff;
+    letter-spacing: -0.2px;
+  }
+  
+  .headerRight {
+    min-width: 80px;
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  /* ── Main ── */
+  .main {
+    max-width: 700px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 24px 40px 40px;
+    flex: 1;
+  }
+  
+  @media (max-width: 600px) {
+    .main { padding: 16px 16px 40px; }
+  }
+  
+  /* ── Error banner ── */
+  .errorBanner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    color: #991b1b;
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+  
+  .dismissBtn {
+    background: none;
+    border: none;
+    color: #991b1b;
+    font-size: 14px;
+    padding: 0 4px;
+  }
+  
+  /* ── Search section ── */
+  .searchSection {
+    margin-bottom: 32px;
+  }
+  
+  .sectionTitle {
+    font-family: var(--font-serif);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .friendCount {
+    background: var(--accent);
+    color: #fff;
+    font-size: 11px;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: var(--radius-pill);
+  }
+  
+  /* ── Search form ── */
+  .searchForm {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .usernameInputWrap {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 0 12px;
+    transition: border-color 0.15s;
+  }
+  
+  .usernameInputWrap:focus-within {
+    border-color: #C8102E;
+  }
+  
+  .at {
+    font-size: 15px;
+    color: var(--muted);
+    font-family: var(--font-serif);
+    padding-right: 2px;
+    user-select: none;
+  }
+  
+  .searchInput {
+    flex: 1;
+    padding: 10px 4px;
+    background: none;
+    border: none;
+    outline: none;
+    font-size: 13px;
+    color: var(--text);
+  }
+  
+  .searchBtn {
+    padding: 10px 20px;
+    background: #C8102E;
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 600;
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+  
+  .searchBtn:hover:not(:disabled) {
+    background: #a50d25;
+  }
+  
+  .searchBtn:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+  
+  .searchMsg {
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  
+  /* ── Search result card ── */
+  .searchResultCard {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+  }
+  
+  .resultAvatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+  
+  .resultInfo { flex: 1; min-width: 0; }
+  
+  .resultName {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: var(--font-serif);
+    color: var(--text);
+  }
+  
+  .resultUsername {
+    margin: 2px 0 0;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  
+  .followBtn {
+    background: #C8102E;
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 7px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+  
+  .followBtn:hover {
+    background: #a50d25;
+  }
+  
+  /* ── Friend search ── */
+  .friendSearchWrap {
+    position: relative;
+    margin-bottom: 16px;
+  }
+  
+  .friendSearchIcon {
+    position: absolute;
+    left: 11px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 14px;
+    pointer-events: none;
+  }
+  
+  .friendSearchInput {
+    width: 100%;
+    padding: 8px 32px 8px 30px;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.15s;
+    box-sizing: border-box;
+  }
+  
+  .friendSearchInput:focus {
+    border-color: #C8102E;
+  }
+  
+  .friendSearchClear {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 14px;
+    padding: 4px;
+    cursor: pointer;
+  }
+  
+  /* ── Friends section ── */
+  .loadingWrap {
+    display: flex;
+    justify-content: center;
+    padding: 48px 0;
+  }
+  
+  .spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--border);
+    border-top-color: #C8102E;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  
+  .emptyState {
+    text-align: center;
+    padding: 48px 0;
+  }
+  
+  .emptyTitle {
+    font-size: 15px;
+    font-weight: 600;
+    font-family: var(--font-serif);
+    color: var(--text);
+    margin: 0 0 6px;
+  }
+  
+  .emptyBody {
+    font-size: 13px;
+    color: var(--muted);
+    margin: 0;
+  }
