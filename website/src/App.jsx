@@ -8,6 +8,7 @@ import LoginPage from "./pages/LoginPage";
 import UsernameSetupPage from "./pages/UsernameSetupPage";
 import RatingsPage from "./pages/RatingsPage";
 import FriendsPage from "./pages/FriendsPage";
+import PredictionsPage from "./pages/PredictionsPage";
 
 function AppRoutes() {
   const { user } = useAuth();
@@ -18,16 +19,10 @@ function AppRoutes() {
   const { notifications, unreadCount, markAllRead, createFollowNotification } = useNotifications(user);
   const friendsState    = useFriends(user, username, createFollowNotification);
 
-  // Still resolving auth
   if (user === undefined) return null;
-
-  // Not logged in
   if (!user) return <LoginPage />;
-
-  // Auth resolved but username check still in flight — show nothing to avoid flash
   if (!loaded) return null;
 
-  // Logged in but no username yet
   if (needsSetup) {
     return (
       <UsernameSetupPage
@@ -54,6 +49,10 @@ function AppRoutes() {
     );
   }
 
+  if (page === "predictions") {
+    return <PredictionsPage onBack={() => setPage("ratings")} />;
+  }
+
   return (
     <RatingsPage
       ratingsState={ratingsState}
@@ -64,6 +63,7 @@ function AppRoutes() {
       onFollowBack={friendsState.followUser}
       followingIds={friendsState.followingIds}
       onOpenFriends={() => setPage("friends")}
+      onOpenPredictions={() => setPage("predictions")}
     />
   );
 }

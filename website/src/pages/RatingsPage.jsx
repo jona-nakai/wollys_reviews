@@ -19,6 +19,7 @@ export default function RatingsPage({
   onFollowBack,
   followingIds,
   onOpenFriends,
+  onOpenPredictions,
 }) {
   const { user } = useAuth();
   const {
@@ -32,7 +33,6 @@ export default function RatingsPage({
   const [menuOpen, setMenuOpen]       = useState(false);
   const menuRef                       = useRef(null);
 
-  // Close menu when clicking outside
   useEffect(() => {
     function handleClick(e) {
       if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
@@ -74,10 +74,8 @@ export default function RatingsPage({
   return (
     <div className={styles.page}>
 
-      {/* Toast */}
       {toast && <div className={styles.toast}>{toast}</div>}
 
-      {/* Header */}
       <header className={styles.header}>
         <div className={styles.headerLeft}>
           <span className={styles.firstName}>@{username}</span>
@@ -91,7 +89,11 @@ export default function RatingsPage({
             onFollowBack={onFollowBack}
             followingIds={followingIds}
           />
+
           {/* Desktop buttons */}
+          <button className={`${styles.tryNextBtn} ${styles.desktopOnly}`} onClick={onOpenPredictions}>
+            🥪 Try Next
+          </button>
           <button className={`${styles.friendsBtn} ${styles.desktopOnly}`} onClick={onOpenFriends}>
             Friends
           </button>
@@ -106,6 +108,9 @@ export default function RatingsPage({
             </button>
             {menuOpen && (
               <div className={styles.dropdown}>
+                <button className={styles.dropItem} onClick={() => { onOpenPredictions(); setMenuOpen(false); }}>
+                  🥪 Try Next
+                </button>
                 <button className={styles.dropItem} onClick={() => { onOpenFriends(); setMenuOpen(false); }}>
                   👥 Friends
                 </button>
@@ -118,21 +123,17 @@ export default function RatingsPage({
         </div>
       </header>
 
-      {/* Content */}
       <main className={styles.main}>
-
-        {/* Progress bar */}
         <div className={styles.progressSection}>
           <div className={styles.progressTrack}>
             <div className={styles.progressFill} style={{ width: `${progress}%` }} />
           </div>
           <span className={styles.progressLabel}>{totalRated} / {ALL_COUNT} rated</span>
         </div>
-        
-        {/* Error banner */}
+        <p className={styles.engineLabel}>ML Recommendation Engine · Khoury College</p>
+
         {error && <div className={styles.errorBanner}>{error}</div>}
 
-        {/* Category tabs */}
         <div className={styles.tabs}>
           {Object.entries(SANDWICHES).map(([key, cat]) => (
             <button
@@ -143,7 +144,6 @@ export default function RatingsPage({
           ))}
         </div>
 
-        {/* Search row */}
         <div className={styles.searchRow}>
           <div className={styles.sectionLabel}>
             {category.label.replace(/^\S+\s*/, "")} Menu
@@ -164,13 +164,11 @@ export default function RatingsPage({
           <span className={styles.faveHint}>★ = Husky fave</span>
         </div>
 
-        {/* Column headers */}
         <div className={styles.colHeaders}>
           <span>Item</span>
           <span>Your rating</span>
         </div>
 
-        {/* Sandwich list */}
         <div className={styles.list}>
           {loading ? (
             <div className={styles.loadingWrap}>
@@ -195,7 +193,6 @@ export default function RatingsPage({
         </div>
       </main>
 
-      {/* Save bar */}
       <footer className={styles.saveBar}>
         <div className={styles.saveBarInner}>
           <span className={styles.saveStatus}>

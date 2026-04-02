@@ -1,0 +1,110 @@
+.page {
+    min-height: 100vh;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .header {
+    background: #C8102E;
+    border-bottom: 3px solid #A4804A;
+    padding: 0 24px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+  
+  .backBtn {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: rgba(255,255,255,0.85);
+    border-radius: var(--radius-sm);
+    padding: 5px 12px;
+    font-size: 12px;
+    min-width: 80px;
+    transition: background 0.15s;
+  }
+  
+  .backBtn:hover { background: rgba(255,255,255,0.22); }
+  
+  .headerTitle {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    font-size: 18px;
+    color: #fff;
+    letter-spacing: -0.2px;
+  }
+  
+  .main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+  }
+  
+  .card {
+    text-align: center;
+    max-width: 380px;
+    width: 100%;
+  }
+  
+  .icon {
+    font-size: 56px;
+    margin-bottom: 16px;
+  }
+  
+  .title {
+    font-family: var(--font-serif);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 12px;
+    letter-spacing: -0.4px;
+  }
+  
+  .body {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin: 0 0 32px;
+  }
+  
+  .progressWrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px 20px;
+  }
+  
+  .progressLabel {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+  }
+  
+  .progressTrack {
+    height: 4px;
+    background: var(--hint);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  
+  .progressFill {
+    height: 100%;
+    width: 15%;
+    background: #C8102E;
+    border-radius: 4px;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.4; }
+  }
