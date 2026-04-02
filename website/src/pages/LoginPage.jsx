@@ -15,11 +15,10 @@ export default function LoginPage() {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <h1 className={styles.title}>Wally's Reviews</h1>
-        <p className={styles.subtitle}>ML Recommendation Engine · Khoury College</p>
+        <h1 className={styles.title}>Wolly ML</h1>
         <div className={styles.divider} />
         <p className={styles.body}>
-          Rate Wally's sandwiches and our model will predict your next favorite order.
+          Rate Wolly's sandwiches and our model will predict your next favorite order.
         </p>
         <button className={styles.loginBtn} onClick={handleLogin}>
           <GoogleIcon /> Continue with Google

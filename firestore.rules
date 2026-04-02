@@ -1,0 +1,53 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isOwner(uid) {
+      return request.auth.uid == uid;
+    }
+
+    // ── Users ─────────────────────────────────────────────────────────────────
+    // Anyone signed in can read user profiles (needed for friend search).
+    // Only the owner can write their own profile.
+    match /users/{userId} {
+      allow read:  if isSignedIn();
+      allow write: if isSignedIn() && isOwner(userId);
+    }
+
+    // ── Ratings ───────────────────────────────────────────────────────────────
+    // Anyone signed in can read ratings (needed for community averages + friends).
+    // Only the owner can write their own ratings.
+    // Doc ID format: {userId}_{sandwichId}
+    match /ratings/{ratingId} {
+      allow read:  if isSignedIn();
+      allow write: if isSignedIn() && isOwner(request.resource.data.userId);
+    }
+
+    // ── Friends ───────────────────────────────────────────────────────────────
+    // Anyone signed in can read friend relationships (needed for following lists).
+    // Only the follower can create/delete their own follow.
+    // Doc ID format: {followerId}_{followingId}
+    match /friends/{friendId} {
+      allow read:   if isSignedIn();
+      allow create: if isSignedIn() && isOwner(request.resource.data.followerId);
+      allow delete: if isSignedIn() && isOwner(resource.data.followerId);
+    }
+
+    // ── Notifications ─────────────────────────────────────────────────────────
+    // Users can only read their own notifications.
+    // Any signed-in user can create a notification (to notify someone they followed).
+    // Only the recipient can update (mark as read).
+    // No deletes — keeps notification history intact.
+    match /notifications/{notifId} {
+      allow read:   if isSignedIn() && isOwner(resource.data.toUid);
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && isOwner(resource.data.toUid);
+      allow delete: if false;
+    }
+
+  }
+}
