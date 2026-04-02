@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { signOut } from "firebase/auth";
 import { auth } from "../services/firebase";
 import { SANDWICHES } from "../constants/sandwiches";
@@ -29,6 +29,17 @@ export default function RatingsPage({
   const [activeCategory, setCategory] = useState("breakfast");
   const [search, setSearch]           = useState("");
   const [toast, setToast]             = useState(null);
+  const [menuOpen, setMenuOpen]       = useState(false);
+  const menuRef                       = useRef(null);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    function handleClick(e) {
+      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
 
   useEffect(() => {
     loadCommunityRatings(activeCategory);
@@ -71,7 +82,7 @@ export default function RatingsPage({
         <div className={styles.headerLeft}>
           <span className={styles.firstName}>@{username}</span>
         </div>
-        <span className={styles.headerTitle}>Wally's Reviews</span>
+        <span className={styles.headerTitle}>Wolly ML</span>
         <div className={styles.headerRight}>
           <NotificationBell
             notifications={notifications}
@@ -80,12 +91,30 @@ export default function RatingsPage({
             onFollowBack={onFollowBack}
             followingIds={followingIds}
           />
-          <button className={styles.friendsBtn} onClick={onOpenFriends}>
+          {/* Desktop buttons */}
+          <button className={`${styles.friendsBtn} ${styles.desktopOnly}`} onClick={onOpenFriends}>
             Friends
           </button>
-          <button className={styles.signOutBtn} onClick={() => signOut(auth)}>
+          <button className={`${styles.signOutBtn} ${styles.desktopOnly}`} onClick={() => signOut(auth)}>
             Sign out
           </button>
+
+          {/* Mobile hamburger */}
+          <div className={`${styles.menuWrap} ${styles.mobileOnly}`} ref={menuRef}>
+            <button className={styles.hamburger} onClick={() => setMenuOpen(o => !o)}>
+              ☰
+            </button>
+            {menuOpen && (
+              <div className={styles.dropdown}>
+                <button className={styles.dropItem} onClick={() => { onOpenFriends(); setMenuOpen(false); }}>
+                  👥 Friends
+                </button>
+                <button className={styles.dropItem} onClick={() => signOut(auth)}>
+                  ↪ Sign out
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
@@ -99,8 +128,7 @@ export default function RatingsPage({
           </div>
           <span className={styles.progressLabel}>{totalRated} / {ALL_COUNT} rated</span>
         </div>
-        <p className={styles.engineLabel}>ML Recommendation Engine · Khoury College</p>
-
+        
         {/* Error banner */}
         {error && <div className={styles.errorBanner}>{error}</div>}
 

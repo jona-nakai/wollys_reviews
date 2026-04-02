@@ -368,3 +368,65 @@
     white-space: nowrap;
     animation: fadeUp 0.2s ease;
   }
+
+  /* ── Desktop / Mobile visibility ── */
+.desktopOnly { display: flex; }
+.mobileOnly  { display: none; }
+
+@media (max-width: 600px) {
+  .main { padding: 16px 16px 0; }
+  .headerRight { gap: 4px; }
+  .desktopOnly { display: none; }
+  .mobileOnly  { display: flex; }
+}
+
+/* ── Hamburger menu ── */
+.menuWrap {
+  position: relative;
+}
+
+.hamburger {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.25);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  padding: 5px 10px;
+  font-size: 16px;
+  line-height: 1;
+  transition: background 0.15s;
+}
+
+.hamburger:hover {
+  background: rgba(255,255,255,0.22);
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  overflow: hidden;
+  z-index: 100;
+  min-width: 140px;
+}
+
+.dropItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--divider);
+  font-size: 13px;
+  color: var(--text);
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.dropItem:last-child { border-bottom: none; }
+.dropItem:hover { background: var(--surface2); }
