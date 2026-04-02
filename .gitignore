@@ -44,3 +44,5 @@ npm-debug.log*
 # Misc
 .cache/
 .temp/
+
+package-lock.json
