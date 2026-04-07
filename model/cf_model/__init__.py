@@ -1,7 +1,6 @@
 # Output files:
 # item_similarities.csv : 27x27 symmetric matrix, sandwich IDs as row/column
 # headers, cosine similarity values
-
 # ratings.csv : columns: user_id, sandwich_id, rating - observed ratings only, no NaNs
 
 # Constraints:
