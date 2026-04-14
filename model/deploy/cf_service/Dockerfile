@@ -10,4 +10,4 @@ RUN pip install --no-cache-dir -r model/deploy/cf_service/requirements.txt
 
 ENV BAYESIAN_SERVICE_URL=""
 
-CMD ["uvicorn", "model.deploy.cf_service.main:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["sh", "-c", "uvicorn model.deploy.cf_service.main:app --host 0.0.0.0 --port ${PORT:-8080}"]
