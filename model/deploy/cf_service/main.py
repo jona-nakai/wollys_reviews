@@ -80,7 +80,7 @@ def predict(request: PredictRequest):
             }
         )
         if response.status_code != 200:
-            raise HTTPException(status_code=500, detail=f"Bayesian service failed for {item_id}")
+            raise HTTPException(status_code=500, detail=f"Bayesian service failed for {item_id}: {response.status_code} {response.text[:200]}")
 
         predictions[item_id] = response.json()["predicted_rating"]
 
