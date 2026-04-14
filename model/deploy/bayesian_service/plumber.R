@@ -1,8 +1,9 @@
 library(plumber)
 
-source("../../bayesian_model/bayesian_model.R")
+source("/app/model/bayesian_model/bayesian_model.R")
 
 #* @post /predict
+#* @param req The request object
 function(req) {
   body <- req$body
 
