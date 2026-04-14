@@ -8,4 +8,4 @@ RUN Rscript -e "install.packages('plumber', repos='https://packagemanager.posit.
 COPY model/bayesian_model/bayesian_model.R model/bayesian_model/bayesian_model.R
 COPY model/deploy/bayesian_service/plumber.R model/deploy/bayesian_service/plumber.R
 
-CMD ["Rscript", "-e", "library(plumber); pr('/app/model/deploy/bayesian_service/plumber.R') |> pr_run(host='0.0.0.0', port=as.integer(Sys.getenv('PORT', 8080)))"]
+CMD ["Rscript", "/app/model/deploy/bayesian_service/plumber.R"]

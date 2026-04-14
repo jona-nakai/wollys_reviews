@@ -2,16 +2,12 @@ library(plumber)
 
 source("/app/model/bayesian_model/bayesian_model.R")
 
-#* @post /predict
-#* @param req The request object
-function(req) {
+predict_handler <- function(req) {
   body <- req$body
 
   user_id <- body$user_id
   item_id <- body$item_id
 
-  # similarities arrives as a named list of named lists OR as a data frame
-  # depending on jsonlite simplification, normalize to a matrix
   sim_raw <- body$similarities
   if (is.data.frame(sim_raw)) {
     sim_matrix <- as.matrix(sim_raw)
@@ -22,7 +18,6 @@ function(req) {
     colnames(sim_matrix) <- item_names
   }
 
-  # ratings arrives as a data frame (jsonlite auto-simplifies arrays of records)
   ratings <- as.data.frame(body$ratings, stringsAsFactors = FALSE)
 
   predicted_rating <- predict_user_item(user_id, item_id, sim_matrix, ratings)
@@ -33,3 +28,7 @@ function(req) {
     predicted_rating = predicted_rating
   )
 }
+
+pr() |>
+  pr_post("/predict", predict_handler) |>
+  pr_run(host = "0.0.0.0", port = as.integer(Sys.getenv("PORT", 8080)))
