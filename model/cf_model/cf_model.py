@@ -63,7 +63,9 @@ def compute_similarity_matrix(df):
     )
 
     # set diagonal to 0 after scaling
-    np.fill_diagonal(sim_df_scaled.values, 0)
+    scaled_array = sim_df_scaled.values.copy()
+    np.fill_diagonal(scaled_array, 0)
+    sim_df_scaled = pd.DataFrame(scaled_array, index=items, columns=items)
 
     sim_df_scaled.index.name = "sandwich_id"
     sim_df_scaled.columns.name = "sandwich_id"
