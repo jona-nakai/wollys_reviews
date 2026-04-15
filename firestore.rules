@@ -23,8 +23,9 @@ service cloud.firestore {
     // Only the owner can write their own ratings.
     // Doc ID format: {userId}_{sandwichId}
     match /ratings/{ratingId} {
-      allow read:  if isSignedIn();
-      allow write: if isSignedIn() && isOwner(request.resource.data.userId);
+      allow read:           if isSignedIn();
+      allow create, update: if isSignedIn() && isOwner(request.resource.data.userId);
+      allow delete:         if isSignedIn() && isOwner(resource.data.userId);
     }
 
     // ── Friends ───────────────────────────────────────────────────────────────
