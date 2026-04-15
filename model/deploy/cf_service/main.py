@@ -5,6 +5,7 @@ import pandas as pd
 import firebase_admin
 from firebase_admin import credentials, firestore
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import google.auth.transport.requests
 import google.oauth2.id_token
@@ -14,6 +15,13 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 from cf_model.cf_model import compute_similarity_matrix
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["POST", "GET", "OPTIONS"],
+    allow_headers=["*"],
+)
 
 BAYESIAN_SERVICE_URL = os.environ.get("BAYESIAN_SERVICE_URL", "http://localhost:8000")
 
