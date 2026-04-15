@@ -38,6 +38,15 @@ service cloud.firestore {
       allow delete: if isSignedIn() && isOwner(resource.data.followerId);
     }
 
+    // ── Predictions ───────────────────────────────────────────────────────────
+    // Cache of server-computed predictions, one doc per user (docId = userId).
+    // Only the owner can read. Writes are performed by the CF service via the
+    // admin SDK, which bypasses rules — clients are not permitted to write.
+    match /predictions/{userId} {
+      allow read:  if isSignedIn() && isOwner(userId);
+      allow write: if false;
+    }
+
     // ── Notifications ─────────────────────────────────────────────────────────
     // Users can only read their own notifications.
     // Any signed-in user can create a notification (to notify someone they followed).

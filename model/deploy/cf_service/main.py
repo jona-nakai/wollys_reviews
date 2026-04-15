@@ -92,6 +92,14 @@ def predict(request: PredictRequest):
 
         predictions[item_id] = response.json()["predicted_rating"]
 
+    # Cache the result so the client can read it directly from Firestore
+    # on future page loads (1 doc read instead of a full collection scan).
+    db.collection("predictions").document(request.user_id).set({
+        "userId":      request.user_id,
+        "predictions": predictions,
+        "updatedAt":   firestore.SERVER_TIMESTAMP,
+    })
+
     return {
         "user_id":     request.user_id,
         "predictions": predictions,

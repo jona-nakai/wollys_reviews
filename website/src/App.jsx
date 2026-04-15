@@ -8,7 +8,6 @@ import LoginPage from "./pages/LoginPage";
 import UsernameSetupPage from "./pages/UsernameSetupPage";
 import RatingsPage from "./pages/RatingsPage";
 import FriendsPage from "./pages/FriendsPage";
-import PredictionsPage from "./pages/PredictionsPage";
 
 function AppRoutes() {
   const { user } = useAuth();
@@ -49,10 +48,6 @@ function AppRoutes() {
     );
   }
 
-  if (page === "predictions") {
-    return <PredictionsPage onBack={() => setPage("ratings")} />;
-  }
-
   return (
     <RatingsPage
       ratingsState={ratingsState}
@@ -63,7 +58,6 @@ function AppRoutes() {
       onFollowBack={friendsState.followUser}
       followingIds={friendsState.followingIds}
       onOpenFriends={() => setPage("friends")}
-      onOpenPredictions={() => setPage("predictions")}
     />
   );
 }

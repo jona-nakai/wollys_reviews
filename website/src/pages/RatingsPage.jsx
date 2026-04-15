@@ -3,12 +3,24 @@ import { signOut } from "firebase/auth";
 import { auth } from "../services/firebase";
 import { SANDWICHES } from "../constants/sandwiches";
 import { useAuth } from "../context/AuthContext";
+import { fetchCachedPredictions, recomputePredictions } from "../services/predictions";
 import SandwichRow from "../components/SandwichRow";
 import NotificationBell from "../components/NotificationBell";
 import styles from "./RatingsPage.module.css";
 
-const ALL_COUNT = Object.values(SANDWICHES)
-  .reduce((sum, cat) => sum + Object.keys(cat.items).length, 0);
+const ALL_ITEMS = Object.values(SANDWICHES).flatMap(cat => Object.entries(cat.items));
+const CATEGORY_KEYS = Object.keys(SANDWICHES);
+const ALL_COUNT = ALL_ITEMS.length;
+
+const SORTS = [
+  { key: "avgDesc",      label: "Avg rating ↓" },
+  { key: "avgAsc",       label: "Avg rating ↑" },
+  { key: "predDesc",     label: "Predicted ↓" },
+  { key: "predAsc",      label: "Predicted ↑" },
+  { key: "myDesc",       label: "My rating ↓" },
+  { key: "myAsc",        label: "My rating ↑" },
+  { key: "alpha",        label: "Alphabetical" },
+];
 
 export default function RatingsPage({
   ratingsState,
@@ -19,7 +31,6 @@ export default function RatingsPage({
   onFollowBack,
   followingIds,
   onOpenFriends,
-  onOpenPredictions,
 }) {
   const { user } = useAuth();
   const {
@@ -27,11 +38,13 @@ export default function RatingsPage({
     totalRated, loading, updateRating, saveRatings, loadCommunityRatings,
   } = ratingsState;
 
-  const [activeCategory, setCategory] = useState("breakfast");
-  const [search, setSearch]           = useState("");
-  const [toast, setToast]             = useState(null);
-  const [menuOpen, setMenuOpen]       = useState(false);
-  const menuRef                       = useRef(null);
+  const [search, setSearch]     = useState("");
+  const [sortBy, setSortBy]     = useState("avgDesc");
+  const [toast, setToast]       = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [predictions, setPredictions] = useState({});
+  const [predictionsLoading, setPredictionsLoading] = useState(true);
+  const menuRef = useRef(null);
 
   useEffect(() => {
     function handleClick(e) {
@@ -41,9 +54,69 @@ export default function RatingsPage({
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
+  // load all categories' community ratings up front since we now show everything
   useEffect(() => {
-    loadCommunityRatings(activeCategory);
-  }, [activeCategory, loadCommunityRatings]);
+    CATEGORY_KEYS.forEach(loadCommunityRatings);
+  }, [loadCommunityRatings]);
+
+  // flip to loading as soon as a save begins so rows show ↻
+  useEffect(() => {
+    if (saving) setPredictionsLoading(true);
+  }, [saving]);
+
+  const savedCount = useMemo(
+    () => Object.values(saved || {}).filter(Boolean).length,
+    [saved]
+  );
+  const hasSavedRatings = savedCount > 0;
+
+  // One-time bootstrap after the user's ratings load. Read the precomputed
+  // predictions doc from Firestore (1 read). If it doesn't exist yet but the
+  // user has saved ratings, trigger a server recompute to populate it.
+  const bootstrappedRef = useRef(false);
+  useEffect(() => {
+    if (!user) return;
+    if (loading) return;                 // wait for saved to load
+    if (bootstrappedRef.current) return;
+    bootstrappedRef.current = true;
+
+    let cancelled = false;
+    (async () => {
+      setPredictionsLoading(true);
+      try {
+        const cached = await fetchCachedPredictions(user.uid);
+        if (cancelled) return;
+        if (cached) {
+          setPredictions(cached.predictions);
+        } else if (hasSavedRatings) {
+          const result = await recomputePredictions(user.uid);
+          if (!cancelled) setPredictions(result.predictions);
+        } else {
+          setPredictions({});
+        }
+      } catch {
+        if (!cancelled) setPredictions({});
+      } finally {
+        if (!cancelled) setPredictionsLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [user, loading, hasSavedRatings]);
+
+  // Refresh predictions from the server and update the cached Firestore doc.
+  // Called explicitly after the user saves ratings.
+  const refreshPredictions = useCallback(async () => {
+    if (!user) return;
+    setPredictionsLoading(true);
+    try {
+      const result = await recomputePredictions(user.uid);
+      setPredictions(result.predictions);
+    } catch {
+      setPredictions({});
+    } finally {
+      setPredictionsLoading(false);
+    }
+  }, [user]);
 
   const showToast = useCallback((msg) => {
     setToast(msg);
@@ -54,22 +127,79 @@ export default function RatingsPage({
   async function handleSave() {
     await saveRatings();
     showToast("Saved! Go Huskies 🐾");
+    refreshPredictions();
   }
 
-  function handleTabChange(key) {
-    setCategory(key);
-    setSearch("");
-  }
-
-  const category = SANDWICHES[activeCategory];
   const progress = Math.round((totalRated / ALL_COUNT) * 100);
 
-  const filtered = useMemo(() => {
-    const entries = Object.entries(category.items);
-    if (!search.trim()) return entries;
-    const s = search.toLowerCase();
-    return entries.filter(([, name]) => name.toLowerCase().includes(s));
-  }, [category, search]);
+  const visible = useMemo(() => {
+    let entries = ALL_ITEMS;
+
+    if (search.trim()) {
+      const s = search.toLowerCase();
+      entries = entries.filter(([, name]) => name.toLowerCase().includes(s));
+    }
+
+    const sorted = [...entries];
+    switch (sortBy) {
+      case "alpha":
+        sorted.sort(([, a], [, b]) => a.localeCompare(b));
+        break;
+      case "avgDesc":
+        sorted.sort(([idA], [idB]) => {
+          const a = communityRatings[idA] ? parseFloat(communityRatings[idA].avg) : null;
+          const b = communityRatings[idB] ? parseFloat(communityRatings[idB].avg) : null;
+          if (a == null && b == null) return 0;
+          if (a == null) return 1;
+          if (b == null) return -1;
+          return b - a;
+        });
+        break;
+      case "avgAsc":
+        sorted.sort(([idA], [idB]) => {
+          const a = communityRatings[idA] ? parseFloat(communityRatings[idA].avg) : null;
+          const b = communityRatings[idB] ? parseFloat(communityRatings[idB].avg) : null;
+          if (a == null && b == null) return 0;
+          if (a == null) return 1;
+          if (b == null) return -1;
+          return a - b;
+        });
+        break;
+      case "myDesc":
+        sorted.sort(([idA], [idB]) => (ratings[idB] || 0) - (ratings[idA] || 0));
+        break;
+      case "myAsc":
+        // unrated (0) at the bottom
+        sorted.sort(([idA], [idB]) => {
+          const a = ratings[idA] || Infinity;
+          const b = ratings[idB] || Infinity;
+          return a - b;
+        });
+        break;
+      case "predDesc":
+        sorted.sort(([idA], [idB]) => {
+          const a = predictions[idA];
+          const b = predictions[idB];
+          if (a == null && b == null) return 0;
+          if (a == null) return 1;
+          if (b == null) return -1;
+          return b - a;
+        });
+        break;
+      case "predAsc":
+        sorted.sort(([idA], [idB]) => {
+          const a = predictions[idA];
+          const b = predictions[idB];
+          if (a == null && b == null) return 0;
+          if (a == null) return 1;
+          if (b == null) return -1;
+          return a - b;
+        });
+        break;
+    }
+
+    return sorted;
+  }, [search, sortBy, ratings, predictions, communityRatings]);
 
   return (
     <div className={styles.page}>
@@ -90,10 +220,6 @@ export default function RatingsPage({
             followingIds={followingIds}
           />
 
-          {/* Desktop buttons */}
-          <button className={`${styles.tryNextBtn} ${styles.desktopOnly}`} onClick={onOpenPredictions}>
-            🥪 Try Next
-          </button>
           <button className={`${styles.friendsBtn} ${styles.desktopOnly}`} onClick={onOpenFriends}>
             Friends
           </button>
@@ -101,16 +227,12 @@ export default function RatingsPage({
             Sign out
           </button>
 
-          {/* Mobile hamburger */}
           <div className={`${styles.menuWrap} ${styles.mobileOnly}`} ref={menuRef}>
             <button className={styles.hamburger} onClick={() => setMenuOpen(o => !o)}>
               ☰
             </button>
             {menuOpen && (
               <div className={styles.dropdown}>
-                <button className={styles.dropItem} onClick={() => { onOpenPredictions(); setMenuOpen(false); }}>
-                  🥪 Try Next
-                </button>
                 <button className={styles.dropItem} onClick={() => { onOpenFriends(); setMenuOpen(false); }}>
                   👥 Friends
                 </button>
@@ -132,22 +254,15 @@ export default function RatingsPage({
         </div>
         <p className={styles.engineLabel}>ML Recommendation Engine · Khoury College</p>
 
+        {!hasSavedRatings && !loading && (
+          <div className={styles.infoBanner}>
+            🥪 Submit some ratings to get predicted ratings.
+          </div>
+        )}
+
         {error && <div className={styles.errorBanner}>{error}</div>}
 
-        <div className={styles.tabs}>
-          {Object.entries(SANDWICHES).map(([key, cat]) => (
-            <button
-              key={key}
-              onClick={() => handleTabChange(key)}
-              className={`${styles.tab} ${activeCategory === key ? styles.tabActive : ""}`}
-            >{cat.label}</button>
-          ))}
-        </div>
-
-        <div className={styles.searchRow}>
-          <div className={styles.sectionLabel}>
-            {category.label.replace(/^\S+\s*/, "")} Menu
-          </div>
+        <div className={styles.controlsRow}>
           <div className={styles.searchWrap}>
             <span className={styles.searchIcon}>⌕</span>
             <input
@@ -161,12 +276,15 @@ export default function RatingsPage({
               <button className={styles.clearBtn} onClick={() => setSearch("")}>✕</button>
             )}
           </div>
-          <span className={styles.faveHint}>★ = Husky fave</span>
-        </div>
-
-        <div className={styles.colHeaders}>
-          <span>Item</span>
-          <span>Your rating</span>
+          <select
+            className={styles.sortSelect}
+            value={sortBy}
+            onChange={e => setSortBy(e.target.value)}
+          >
+            {SORTS.map(s => (
+              <option key={s.key} value={s.key}>Sort: {s.label}</option>
+            ))}
+          </select>
         </div>
 
         <div className={styles.list}>
@@ -174,18 +292,20 @@ export default function RatingsPage({
             <div className={styles.loadingWrap}>
               <div className={styles.spinner} />
             </div>
-          ) : filtered.length === 0 ? (
+          ) : visible.length === 0 ? (
             <div className={styles.empty}>Nothing found for "{search}"</div>
           ) : (
-            filtered.map(([id, name], i) => (
+            visible.map(([id, name], i) => (
               <SandwichRow
                 key={id}
                 id={id}
                 name={name}
                 myRating={ratings[id] || 0}
                 communityR={communityRatings[id]}
+                predicted={predictions[id]}
+                predictionsLoading={predictionsLoading}
                 isSaved={!!saved?.[id]}
-                isLast={i === filtered.length - 1}
+                isLast={i === visible.length - 1}
                 onChange={updateRating}
               />
             ))
