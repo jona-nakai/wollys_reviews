@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import {
   collection, query, where, getDocs,
-  serverTimestamp, doc, setDoc,
+  serverTimestamp, doc, setDoc, deleteDoc,
 } from "firebase/firestore";
 import { db } from "../services/firebase";
 import { SANDWICHES } from "../constants/sandwiches";
@@ -97,14 +97,16 @@ export function useRatings(user) {
     setError(null);
     try {
       await Promise.all(
-        changed.map(([id, taste]) =>
-          setDoc(doc(db, "ratings", `${user.uid}_${id}`), {
+        changed.map(([id, taste]) => {
+          const ref = doc(db, "ratings", `${user.uid}_${id}`);
+          if (!taste) return deleteDoc(ref);
+          return setDoc(ref, {
             userId:     user.uid,
             sandwichId: id,
             taste,
             updatedAt:  serverTimestamp(),
-          })
-        )
+          });
+        })
       );
       setSaved({ ...ratings });
     } catch {
