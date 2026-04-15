@@ -29,6 +29,7 @@ predict_handler <- function(req) {
   )
 }
 
-pr() |>
-  pr_post("/predict", predict_handler) |>
-  pr_run(host = "0.0.0.0", port = as.integer(Sys.getenv("PORT", 8080)))
+root <- pr()
+root <- pr_post(root, "/predict", predict_handler)
+root <- pr_get(root, "/", function() list(status = "ok"))
+pr_run(root, host = "0.0.0.0", port = as.integer(Sys.getenv("PORT", 8080)))
