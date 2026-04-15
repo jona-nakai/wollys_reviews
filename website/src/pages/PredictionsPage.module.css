@@ -4,7 +4,7 @@
     display: flex;
     flex-direction: column;
   }
-  
+
   .header {
     background: #C8102E;
     border-bottom: 3px solid #A4804A;
@@ -17,7 +17,7 @@
     top: 0;
     z-index: 20;
   }
-  
+
   .backBtn {
     background: rgba(255,255,255,0.12);
     border: 1px solid rgba(255,255,255,0.25);
@@ -28,9 +28,9 @@
     min-width: 80px;
     transition: background 0.15s;
   }
-  
+
   .backBtn:hover { background: rgba(255,255,255,0.22); }
-  
+
   .headerTitle {
     font-family: var(--font-serif);
     font-weight: 700;
@@ -38,73 +38,101 @@
     color: #fff;
     letter-spacing: -0.2px;
   }
-  
+
   .main {
     flex: 1;
+    padding: 28px 24px 60px;
     display: flex;
-    align-items: center;
     justify-content: center;
-    padding: 40px 24px;
   }
-  
-  .card {
+
+  .centerWrap {
     text-align: center;
     max-width: 380px;
-    width: 100%;
+    margin: 60px auto 0;
   }
-  
+
   .icon {
     font-size: 56px;
     margin-bottom: 16px;
   }
-  
+
   .title {
     font-family: var(--font-serif);
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 700;
     color: var(--text);
     margin: 0 0 12px;
     letter-spacing: -0.4px;
   }
-  
+
   .body {
     font-size: 14px;
     color: var(--muted);
     line-height: 1.7;
-    margin: 0 0 32px;
+    margin: 0;
   }
-  
-  .progressWrap {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 16px 20px;
+
+  .muted {
+    color: var(--muted);
+    font-size: 14px;
   }
-  
-  .progressLabel {
+
+  .errorText {
+    color: #C8102E;
+    font-size: 14px;
+  }
+
+  .listWrap {
+    width: 100%;
+    max-width: 560px;
+  }
+
+  .engineLabel {
+    text-align: center;
     font-size: 11px;
     color: var(--muted);
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    margin-bottom: 10px;
+    margin: 0 0 18px;
   }
-  
-  .progressTrack {
-    height: 4px;
-    background: var(--hint);
-    border-radius: 4px;
+
+  .list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
     overflow: hidden;
   }
-  
-  .progressFill {
-    height: 100%;
-    width: 15%;
-    background: #C8102E;
-    border-radius: 4px;
-    animation: pulse 2s ease-in-out infinite;
+
+  .row {
+    display: grid;
+    grid-template-columns: 36px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    font-size: 15px;
   }
-  
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50%       { opacity: 0.4; }
+
+  .row:last-child { border-bottom: none; }
+
+  .rank {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    color: #C8102E;
+    font-size: 16px;
+  }
+
+  .name {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .score {
+    color: var(--muted);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
   }
