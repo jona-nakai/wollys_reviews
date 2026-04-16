@@ -256,7 +256,7 @@ export default function RatingsPage({
 
         {!hasSavedRatings && !loading && (
           <div className={styles.infoBanner}>
-            🥪 Submit some ratings to get predicted ratings.
+            Rate some sandwiches to unlock your personalized predictions 🥪
           </div>
         )}
 

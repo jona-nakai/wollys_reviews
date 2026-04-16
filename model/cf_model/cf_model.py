@@ -50,10 +50,10 @@ def compute_similarity_matrix(df):
     )
 
     # set diagonal to NaN before scaling so it doesn't affect min/max
-    np.fill_diagonal(sim_symmetric, np.nan)
+    np.fill_diagonal(sim_symmetric, np.nan)  # type: ignore
 
     # min-max scale each column to [0, 1]
-    sim_df = pd.DataFrame(sim_symmetric, index=items, columns=items)
+    sim_df = pd.DataFrame(sim_symmetric, index=items, columns=items)  # type: ignore
 
     sim_df_scaled = sim_df.apply(
         lambda x: (x - np.nanmin(x)) / (np.nanmax(x) - np.nanmin(x))
@@ -64,8 +64,8 @@ def compute_similarity_matrix(df):
 
     # set diagonal to 0 after scaling
     scaled_array = sim_df_scaled.values.copy()
-    np.fill_diagonal(scaled_array, 0)
-    sim_df_scaled = pd.DataFrame(scaled_array, index=items, columns=items)
+    np.fill_diagonal(scaled_array, 0)  # type: ignore
+    sim_df_scaled = pd.DataFrame(scaled_array, index=items, columns=items)  # type: ignore
 
     sim_df_scaled.index.name = "sandwich_id"
     sim_df_scaled.columns.name = "sandwich_id"
@@ -106,7 +106,7 @@ def item_collab_filter(df, target_user):
     return predicted_ratings
 
 
-def generate_loo_predictions(df):
+def generate_predictions(df):
     records = []
 
     for user in df.index:
@@ -144,18 +144,18 @@ def generate_loo_predictions(df):
             })
 
     predictions_df = pd.DataFrame(
-        records, columns=["user_id", "sandwich_id", "cf_pred", "actual_rating"])
-    predictions_df.to_csv("model/data/cf_predictions.csv", index=False)
+        records, columns=["user_id", "sandwich_id", "cf_pred", "actual_rating"])  # type: ignore
+    predictions_df.to_csv("analysis/data/cf_predictions.csv", index=False)
 
     return predictions_df
 
 
 if __name__ == "__main__":
-    df = pd.read_csv("model/data/ratings.csv", index_col="user_id", na_values="NA")
+    df = pd.read_csv("analysis/data/ratings.csv", index_col="user_id", na_values="NA")
 
     # compute and save the similarity matrix
     sim_df = compute_similarity_matrix(df)
-    sim_df.to_csv("model/data/item_similarities.csv")
+    sim_df.to_csv("analysis/data/item_similarities.csv")
 
     # melt to long format for the Bayesian model
     ratings_long = df.reset_index().melt(
@@ -164,8 +164,8 @@ if __name__ == "__main__":
         value_name="taste"
     ).dropna(subset=["taste"])
     ratings_long = ratings_long[["user_id", "sandwich_id", "taste"]].reset_index(drop=True)
-    ratings_long.to_csv("model/data/ratings_long.csv", index=False)
+    ratings_long.to_csv("analysis/data/ratings_long.csv", index=False)
 
-    # generate and save LOO predictions
-    predictions_df = generate_loo_predictions(df)
+    # generate and save predictions
+    predictions_df = generate_predictions(df)
     print(predictions_df.head())

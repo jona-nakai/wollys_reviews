@@ -46,8 +46,8 @@ npm-debug.log*
 .temp/
 
 # Generated model data files
-model/data/cf_predictions.csv
-model/data/item_similarities.csv
-model/data/ratings_long.csv
+analysis/data/cf_predictions.csv
+analysis/data/item_similarities.csv
+analysis/data/ratings_long.csv
 
 package-lock.json
