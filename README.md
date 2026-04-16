@@ -8,7 +8,7 @@ Users rate sandwiches on a 1–5 scale (0.5 increments). The recommendation engi
 
 ## IMPORTANT NOTE FOR GRADERS
 
-We were given permission to use generative AI in order to build and deploy the website by professor Gerber. Code found in the website/ and model/deploy/ direction was generated with the assistance of generative AI. Code found in model/cf_model/ and model/bayesian/model/ were coded by team members, not generative AI.
+We were given permission to use generative AI in order to build and deploy the website by professor Gerber. Code found in the website/ and model/deploy/ direction was generated with the assistance of generative AI. Code found in model/cf_model/, model/bayesian_model/, and analysis/ were coded by team members, not generative AI.
 
 ---
 
@@ -40,6 +40,11 @@ wollys_reviews/
 │           ├── plumber.R
 │           ├── packages.R
 │           └── Dockerfile
+├── analysis/                       # Evaluation and plots
+│   ├── test.R                      # RMSE evaluation
+│   ├── plots.R                     # Generate plots
+│   ├── data/                       # CSV's
+│   └── plots/                      # PNG plots
 └── project_admin/                  # Course materials and guidelines
 ```
 
@@ -77,21 +82,25 @@ npm run dev
 
 ### 2. Model — Local Testing
 
-Generate data files from the ratings CSV, obtained via Google Forms (run from repo root):
+Obtain prediction CSV files using predictions.csv (ratings obtained from Google Forms)
 
 ```bash
 python model/cf_model/cf_model.py
 ```
 
-This produces `model/data/item_similarities.csv`, `model/data/ratings_long.csv`, and `model/data/cf_predictions.csv`.
+This produces `analysis/data/item_similarities.csv`, `analysis/data/ratings_long.csv`, and `analysis/data/cf_predictions.csv`.
 
 Run the Bayesian model evaluation:
 
 ```bash
-Rscript model/bayesian_model/test.R
+Rscript analysis/test.R
 ```
 
-This prints CF RMSE vs Bayesian RMSE on held-out ratings.
+Run the script to generate plots
+
+```bash
+Rscript analysis/plots.R
+```
 
 ### 3. Services — Local Testing
 
