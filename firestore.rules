@@ -38,6 +38,14 @@ service cloud.firestore {
       allow delete: if isSignedIn() && isOwner(resource.data.followerId);
     }
 
+    // ── Community Stats ────────────────────────────────────────────────────────
+    // Pre-aggregated avg + count per sandwich. Anyone signed in can read.
+    // Clients update via increment() on save; admin SDK also writes.
+    match /community_stats/{docId} {
+      allow read:  if isSignedIn();
+      allow write: if isSignedIn();
+    }
+
     // ── Predictions ───────────────────────────────────────────────────────────
     // Cache of server-computed predictions, one doc per user (docId = userId).
     // Only the owner can read. Writes are performed by the CF service via the

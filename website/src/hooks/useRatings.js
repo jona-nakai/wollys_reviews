@@ -1,19 +1,9 @@
 import { useState, useCallback, useEffect } from "react";
 import {
-  collection, query, where, getDocs,
-  serverTimestamp, doc, setDoc, deleteDoc,
+  collection, query, where, getDocs, getDoc,
+  serverTimestamp, doc, setDoc, deleteDoc, updateDoc, increment,
 } from "firebase/firestore";
 import { db } from "../services/firebase";
-import { SANDWICHES } from "../constants/sandwiches";
-
-// Firestore "in" queries are capped at 30 items per call
-const BATCH_SIZE = 30;
-
-function chunkArray(arr, size) {
-  const chunks = [];
-  for (let i = 0; i < arr.length; i += size) chunks.push(arr.slice(i, i + size));
-  return chunks;
-}
 
 export function useRatings(user) {
   const [ratings,          setRatings]          = useState({});
@@ -51,32 +41,17 @@ export function useRatings(user) {
     return () => { cancelled = true; };
   }, [user]);
 
-  // Load community ratings for a category (batched)
-  const loadCommunityRatings = useCallback(async (category) => {
-    const ids = Object.keys(SANDWICHES[category].items);
-    const result = {};
-
+  // Load community ratings from pre-aggregated doc (1 read)
+  const loadCommunityRatings = useCallback(async () => {
     try {
-      await Promise.all(
-        chunkArray(ids, BATCH_SIZE).map(async chunk => {
-          const snap = await getDocs(
-            query(collection(db, "ratings"), where("sandwichId", "in", chunk))
-          );
-          snap.forEach(d => {
-            const { sandwichId, taste } = d.data();
-            if (!taste) return;
-            if (!result[sandwichId]) result[sandwichId] = { sum: 0, count: 0 };
-            result[sandwichId].sum   += taste;
-            result[sandwichId].count += 1;
-          });
-        })
-      );
-
+      const snap = await getDoc(doc(db, "community_stats", "all"));
+      if (!snap.exists()) return;
+      const data = snap.data();
       const formatted = {};
-      for (const [id, { sum, count }] of Object.entries(result)) {
-        formatted[id] = { avg: (sum / count).toFixed(1), count };
+      for (const [id, { sum, count }] of Object.entries(data)) {
+        if (count > 0) formatted[id] = { avg: (sum / count).toFixed(1), count };
       }
-      setCommunityRatings(prev => ({ ...prev, ...formatted }));
+      setCommunityRatings(formatted);
     } catch (e) {
       console.error("Failed to load community ratings:", e);
     }
@@ -108,6 +83,24 @@ export function useRatings(user) {
           });
         })
       );
+
+      // Update aggregated community stats (1 write instead of re-reading all)
+      const statsRef = doc(db, "community_stats", "all");
+      const updates = {};
+      for (const [id, newTaste] of changed) {
+        const oldTaste = saved[id] || 0;
+        if (newTaste && !oldTaste) {
+          updates[`${id}.sum`] = increment(newTaste);
+          updates[`${id}.count`] = increment(1);
+        } else if (!newTaste && oldTaste) {
+          updates[`${id}.sum`] = increment(-oldTaste);
+          updates[`${id}.count`] = increment(-1);
+        } else if (newTaste && oldTaste) {
+          updates[`${id}.sum`] = increment(newTaste - oldTaste);
+        }
+      }
+      if (Object.keys(updates).length) await updateDoc(statsRef, updates);
+
       setSaved({ ...ratings });
     } catch {
       setError("Failed to save. Please try again.");

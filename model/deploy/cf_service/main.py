@@ -41,10 +41,13 @@ def load_ratings_from_firestore() -> pd.DataFrame:
     records = []
     for doc in docs:
         data = doc.to_dict()
+        taste = data["taste"]
+        if not taste or taste <= 0:
+            continue
         records.append({
             "user_id":     data["userId"],
             "sandwich_id": data["sandwichId"],
-            "taste":       data["taste"],
+            "taste":       taste,
         })
     return pd.DataFrame(records, columns=["user_id", "sandwich_id", "taste"])
 
@@ -59,11 +62,18 @@ def predict(request: PredictRequest):
     # pivot to wide format for CF
     df = ratings_long.pivot(index="user_id", columns="sandwich_id", values="taste")
 
+    # include all known sandwiches in the matrix, even ones with no ratings yet
+    stats_doc = db.collection("community_stats").document("all").get()
+    all_sandwich_ids = list(stats_doc.to_dict().keys()) if stats_doc.exists else list(df.columns)
+    for sid in all_sandwich_ids:
+        if sid not in df.columns:
+            df[sid] = np.nan
+
     sim_df = compute_similarity_matrix(df)
 
     # sandwiches the target user has rated
     rated = ratings_long[ratings_long["user_id"] == request.user_id]["sandwich_id"].tolist()
-    unrated_items = [s for s in df.columns if s not in rated]
+    unrated_items = [s for s in all_sandwich_ids if s not in rated]
 
     ratings_records = ratings_long.to_dict(orient="records")
 

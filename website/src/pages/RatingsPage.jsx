@@ -9,7 +9,6 @@ import NotificationBell from "../components/NotificationBell";
 import styles from "./RatingsPage.module.css";
 
 const ALL_ITEMS = Object.values(SANDWICHES).flatMap(cat => Object.entries(cat.items));
-const CATEGORY_KEYS = Object.keys(SANDWICHES);
 const ALL_COUNT = ALL_ITEMS.length;
 
 const SORTS = [
@@ -54,9 +53,9 @@ export default function RatingsPage({
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  // load all categories' community ratings up front since we now show everything
+  // load community ratings from aggregated doc (1 Firestore read)
   useEffect(() => {
-    CATEGORY_KEYS.forEach(loadCommunityRatings);
+    loadCommunityRatings();
   }, [loadCommunityRatings]);
 
   // flip to loading as soon as a save begins so rows show ↻
@@ -70,15 +69,14 @@ export default function RatingsPage({
   );
   const hasSavedRatings = savedCount > 0;
 
-  // One-time bootstrap after the user's ratings load. Read the precomputed
-  // predictions doc from Firestore (1 read). If it doesn't exist yet but the
-  // user has saved ratings, trigger a server recompute to populate it.
   const bootstrappedRef = useRef(false);
   useEffect(() => {
     if (!user) return;
-    if (loading) return;                 // wait for saved to load
+    if (loading) return;
     if (bootstrappedRef.current) return;
     bootstrappedRef.current = true;
+
+    const ratedIds = new Set(Object.keys(saved || {}).filter(id => saved[id]));
 
     let cancelled = false;
     (async () => {
@@ -86,8 +84,18 @@ export default function RatingsPage({
       try {
         const cached = await fetchCachedPredictions(user.uid);
         if (cancelled) return;
+
         if (cached) {
           setPredictions(cached.predictions);
+
+          // Recompute if any unrated sandwich is missing a prediction (stale cache)
+          const stale = hasSavedRatings && ALL_ITEMS.some(
+            ([id]) => !ratedIds.has(id) && cached.predictions[id] == null
+          );
+          if (stale) {
+            const result = await recomputePredictions(user.uid);
+            if (!cancelled) setPredictions(result.predictions);
+          }
         } else if (hasSavedRatings) {
           const result = await recomputePredictions(user.uid);
           if (!cancelled) setPredictions(result.predictions);
